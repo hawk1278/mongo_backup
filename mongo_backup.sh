@@ -4,6 +4,7 @@ TIME=`date '+%d%m%Y'`
 DTG=`date '+%d%m%Y-%H%M%S'`
 LOGNAME=mongo_backup-$DTG.log
 MD=`which mongodump`
+AWS=`which aws`
 
 
 write_log(){
@@ -38,9 +39,9 @@ then
 fi
 
 write_log "INFO" "Creating tar of backup."
-/bin/tar cvf $TAR `basename $DEST`
+tar cvf $TAR `basename $DEST`
 write_log "INFO" "Uploading to S3 bucket $BUCKET"
-if ! /usr/bin/aws s3 cp $TAR s3://$BUCKET/$TAR;
+if ! $AWS s3 cp $TAR s3://$BUCKET/mongo_backup-$TIME.tar;
 then
   write_log "ERROR" "Failed to upload to bucket, $BUCKET"
   echo "Failed to upload to bucket, $BUCKET"
