@@ -5,7 +5,7 @@ DTG=`date '+%d%m%Y-%H%M%S'`
 LOGNAME=mongo_backup-$DTG.log
 MD=`which mongodump`
 AWS=`which aws`
-
+REGION=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}'`
 
 write_log(){
   echo "$DTG - $1 - $2" >> "${LOGNAME}"
@@ -20,7 +20,7 @@ do
         d) DB=${OPTARG};;
         b) BUCKET=${OPTARG};;
 	f) DEST=${OPTARG};; 
-	\?) echo "Invalid argument" && echo "Usage: ./mongo_backup.sh -h <HOST> -d <DB> -b <BUCKET> -f <DESTINATION>" && exit 1;;
+	\?) echo "Invalid argument" && echo "Usage: ./mongo_backup.sh -h <MONGOHOST> -d <DB> -b <BUCKET NAME> -f <DESTINATION>" && exit 1;;
   esac
 done
 
@@ -41,7 +41,7 @@ fi
 write_log "INFO" "Creating tar of backup."
 tar cvf $TAR `basename $DEST`
 write_log "INFO" "Uploading to S3 bucket $BUCKET"
-if ! $AWS s3 cp $TAR s3://$BUCKET/mongo_backup-$TIME.tar;
+if ! $AWS s3 cp $TAR s3://$BUCKET/mongo_backup-$TIME.tar --region $REGION;
 then
   write_log "ERROR" "Failed to upload to bucket, $BUCKET"
   echo "Failed to upload to bucket, $BUCKET"
