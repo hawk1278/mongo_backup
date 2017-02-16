@@ -41,7 +41,7 @@ fi
 write_log "INFO" "Creating tar of backup."
 tar cvf $TAR `basename $DEST`
 write_log "INFO" "Uploading to S3 bucket $BUCKET"
-if ! $AWS s3 cp $TAR s3://$BUCKET/mongo_backup-$TIME.tar --region $REGION;
+if ! $AWS s3 cp $TAR s3://$BUCKET/mongo_backup-$TIME.tar --sse AES256 --region $REGION;
 then
   write_log "ERROR" "Failed to upload to bucket, $BUCKET"
   echo "Failed to upload to bucket, $BUCKET"
